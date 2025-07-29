@@ -1,19 +1,15 @@
 'use client';
 
-import { generateMemoryCue } from '@/ai/flows/generate-memory-cue';
 import { COUNTRIES, type Country } from '@/lib/countries';
 import { cn } from '@/lib/utils';
-import { Lightbulb, LoaderCircle, Sparkles, Wand } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { Skeleton } from './ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { useToast } from '@/hooks/use-toast';
 
 type CountryListItemData = Country & { memorized: boolean };
 const LOCAL_STORAGE_KEY = 'geoquiz-memorized';
@@ -21,10 +17,6 @@ const LOCAL_STORAGE_KEY = 'geoquiz-memorized';
 export function CountryList() {
   const [countries, setCountries] = useState<CountryListItemData[]>([]);
   const [isClient, setIsClient] = useState(false);
-  const [hint, setHint] = useState<{ country: string; capital: string; cue: string | null }>({ country: '', capital: '', cue: null });
-  const [isHintLoading, setIsHintLoading] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
@@ -52,25 +44,6 @@ export function CountryList() {
       prev.map((c) => (c.code === code ? { ...c, memorized: !c.memorized } : c))
     );
   };
-
-  const handleShowHint = async (country: Country) => {
-    setHint({ country: country.name, capital: country.capital, cue: null });
-    setIsHintLoading(true);
-    try {
-      const result = await generateMemoryCue({ country: country.name, capital: country.capital });
-      setHint({ ...hint, cue: result.cue });
-    } catch (error) {
-      console.error('Failed to generate hint:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not generate a hint. Please try again later.',
-      });
-      setHint({ country: '', capital: '', cue: null });
-    } finally {
-      setIsHintLoading(false);
-    }
-  };
   
   const memorizedCount = countries.filter(c => c.memorized).length;
 
@@ -85,7 +58,6 @@ export function CountryList() {
               </TableHead>
               <TableHead>Country</TableHead>
               <TableHead>Capital</TableHead>
-              <TableHead className="w-12 text-center">Hint</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,11 +77,6 @@ export function CountryList() {
                   </TableCell>
                   <TableCell className="font-medium">{country.name}</TableCell>
                   <TableCell>{country.capital}</TableCell>
-                  <TableCell className="text-center">
-                    <Button variant="ghost" size="icon" onClick={() => handleShowHint(country)} aria-label={`Get hint for ${country.name}`}>
-                      <Lightbulb className="h-5 w-5" />
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -118,7 +85,6 @@ export function CountryList() {
                   <TableCell><Skeleton className="h-5 w-5 rounded" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-3/4 rounded" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-2/3 rounded" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
                 </TableRow>
               ))
             )}
@@ -144,31 +110,6 @@ export function CountryList() {
           </p>
         )}
       </div>
-
-      <Dialog open={!!hint.country} onOpenChange={(isOpen) => !isOpen && setHint({ country: '', capital: '', cue: null })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Wand className="text-primary" /> Memory Cue
-            </DialogTitle>
-            <DialogDescription>
-              For {hint.country} &mdash; {hint.capital}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            {isHintLoading ? (
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <LoaderCircle className="h-5 w-5 animate-spin" />
-                <span>Generating a creative hint...</span>
-              </div>
-            ) : (
-              <p className="text-lg text-center font-medium p-4 bg-accent/20 rounded-md">
-                {hint.cue}
-              </p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
