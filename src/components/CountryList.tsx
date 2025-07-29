@@ -62,7 +62,7 @@ export function CountryList() {
   const memorizedCount = countries.filter(c => c.memorized).length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 h-full">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
@@ -74,7 +74,7 @@ export function CountryList() {
         />
       </div>
 
-      <ScrollArea className="h-96 w-full rounded-md border">
+      <ScrollArea className="flex-1 w-full rounded-md border">
         <Table>
           <TableHeader className="sticky top-0 bg-card z-10">
             <TableRow>
@@ -105,7 +105,7 @@ export function CountryList() {
                 </TableRow>
               ))
             ) : (
-              Array.from({ length: 10 }).map((_, i) => (
+              Array.from({ length: 15 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-5 w-5 rounded" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-3/4 rounded" /></TableCell>
