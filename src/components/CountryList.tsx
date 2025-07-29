@@ -2,11 +2,12 @@
 
 import { COUNTRIES, type Country } from '@/lib/countries';
 import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
+import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Skeleton } from './ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -17,6 +18,7 @@ const LOCAL_STORAGE_KEY = 'geoquiz-memorized';
 export function CountryList() {
   const [countries, setCountries] = useState<CountryListItemData[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -35,9 +37,21 @@ export function CountryList() {
     }
   }, [countries, isClient]);
 
+  const filteredCountries = useMemo(() => {
+    return countries.filter(
+      (country) =>
+        country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        country.capital.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [countries, searchTerm]);
+
   const sortedCountries = useMemo(() => {
-    return [...countries].sort((a, b) => Number(b.memorized) - Number(a.memorized));
-  }, [countries]);
+    return [...filteredCountries].sort((a, b) => {
+      if (a.memorized && !b.memorized) return -1;
+      if (!a.memorized && b.memorized) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [filteredCountries]);
 
   const handleToggleMemorized = (code: string) => {
     setCountries((prev) =>
@@ -49,6 +63,17 @@ export function CountryList() {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search for a country or capital..."
+          className="pl-10 w-full"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <ScrollArea className="h-96 w-full rounded-md border">
         <Table>
           <TableHeader className="sticky top-0 bg-card z-10">
