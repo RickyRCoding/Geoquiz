@@ -63,6 +63,25 @@ export function CountryList() {
 
   return (
     <div className="flex flex-col gap-6 h-full">
+      <div className="text-center">
+        <Button 
+          size="lg" 
+          asChild
+          disabled={memorizedCount === 0}
+          className="shadow-lg"
+        >
+          <Link href="/quiz">
+            <Sparkles className="mr-2 h-5 w-5" />
+            Start Quiz ({memorizedCount} Memorized)
+          </Link>
+        </Button>
+        {memorizedCount === 0 && isClient && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Check some countries you've memorized to start a quiz!
+          </p>
+        )}
+      </div>
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
@@ -116,25 +135,6 @@ export function CountryList() {
           </TableBody>
         </Table>
       </ScrollArea>
-      
-      <div className="text-center">
-        <Button 
-          size="lg" 
-          asChild
-          disabled={memorizedCount === 0}
-          className="shadow-lg"
-        >
-          <Link href="/quiz">
-            <Sparkles className="mr-2 h-5 w-5" />
-            Start Quiz ({memorizedCount} Memorized)
-          </Link>
-        </Button>
-        {memorizedCount === 0 && isClient && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Check some countries you've memorized to start a quiz!
-          </p>
-        )}
-      </div>
     </div>
   );
 }
